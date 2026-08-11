@@ -1,11 +1,11 @@
-import { StrictMode, type ReactNode, useEffect, useRef, useState } from "react";
+import { StrictMode, type FormEvent, type ReactNode, useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { Mail, MapPin, Phone } from "lucide-react";
 
 import "./styles.css";
 import { about, equipment, experience as existingExperience, profile } from "./data/portfolio";
 
-type Page = "home" | "photography" | "cinematography" | "about" | "contact" | "weddings";
+type Page = "home" | "photography" | "cinematography" | "about" | "contact" | "weddings" | "story";
 
 const basePath = import.meta.env.BASE_URL;
 const asset = (path: string) => `${basePath}${path}`;
@@ -58,6 +58,7 @@ function currentPage(): Page {
   if (path.includes("cinematography")) return "cinematography";
   if (path.includes("about")) return "about";
   if (path.includes("contact")) return "contact";
+  if (path.includes("himali-brian-courthouse-wedding")) return "story";
   if (path.includes("nj-wedding-photography-video")) return "weddings";
   if (path.includes("photography")) return "photography";
   return "home";
@@ -179,10 +180,16 @@ function PhotographyPage() {
         <div className="max-w-2xl"><p className="text-xs uppercase tracking-[0.3em] text-[#e3a073]">Wedding & portrait photography</p><h1 className="mt-5 font-serif text-6xl leading-[.85] text-primary sm:text-8xl">Honest moments, beautifully held.</h1><p className="mt-6 max-w-lg leading-relaxed text-[#eee4d8]/82">A growing collection of intimate wedding, portrait, and family work from around New Jersey.</p></div>
       </div>
     </section>
+    <section className="border-b border-white/10 bg-[#17110e]">
+      <div className="mx-auto grid max-w-7xl gap-7 px-5 py-12 md:grid-cols-[1fr_auto] md:items-end md:px-8">
+        <div><p className="text-xs uppercase tracking-[.28em] text-[#e3a073]">Featured wedding story</p><h2 className="mt-3 font-serif text-4xl text-primary">Himali & Brian's courthouse celebration.</h2><p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">A closer look at the quiet portraits, color, and documentary moments from this New Jersey wedding day.</p></div>
+        <a href={asset("himali-brian-courthouse-wedding/")} className="shrink-0 border-b border-[#e3a073] pb-2 text-xs uppercase tracking-[.2em] text-primary transition hover:text-[#e3a073]">Read the story</a>
+      </div>
+    </section>
     {photoCollections.map((collection) => <section key={collection.name} className="border-t border-white/10">
       <div className="mx-auto max-w-7xl px-5 py-16 md:px-8 md:py-24">
         <div className="mb-10 flex flex-col gap-2 md:flex-row md:items-end md:justify-between"><div><p className="text-xs uppercase tracking-[0.28em] text-[#e3a073]">Selected work</p><h2 className="mt-3 font-serif text-5xl text-primary">{collection.name}</h2></div><p className="text-sm text-muted-foreground">{collection.kind}</p></div>
-        <div className="columns-1 gap-5 sm:columns-2 lg:columns-3">{collection.images.map((image, index) => <figure key={image} className="mb-5 break-inside-avoid overflow-hidden bg-[#251915] p-2"><img loading={index > 1 ? "lazy" : "eager"} className="h-auto w-full" src={asset(`portfolio/${image}`)} alt={`${collection.name} photograph ${index + 1}`} /></figure>)}</div>
+        <div className="columns-1 gap-5 sm:columns-2 lg:columns-3">{collection.images.map((image, index) => <figure key={image} className="mb-5 break-inside-avoid overflow-hidden bg-[#251915] p-2"><img loading="lazy" decoding="async" className="h-auto w-full" src={asset(`portfolio/${image}`)} alt={`${collection.name} photograph ${index + 1}`} /></figure>)}</div>
       </div>
     </section>)}
     <section className="mx-auto max-w-7xl px-5 py-16 md:px-8 md:py-24"><SectionHeading eyebrow="Equipment" title="What I bring." /><div className="mt-10"><GearList /></div></section>
@@ -258,12 +265,49 @@ function ContactPage() {
 
 function Deliverables({ title, items }: { title: string; items: string[] }) { return <article className="border border-white/10 bg-[#17110e] p-8"><p className="text-xs uppercase tracking-[.25em] text-[#e3a073]">Deliverables</p><h2 className="mt-3 font-serif text-4xl text-primary">{title}</h2><ul className="mt-7 space-y-4">{items.map((item) => <li key={item} className="flex gap-3 text-sm leading-relaxed text-[#eee4d8]/80"><span className="mt-2 size-1.5 shrink-0 rounded-full bg-[#e3a073]" />{item}</li>)}</ul></article>; }
 
+function InquiryForm() {
+  const [status, setStatus] = useState("");
+
+  const submitInquiry = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const name = String(form.get("name") ?? "").trim();
+    const date = String(form.get("date") ?? "").trim();
+    const location = String(form.get("location") ?? "").trim();
+    const coverage = String(form.get("coverage") ?? "").trim();
+    const details = String(form.get("details") ?? "").trim();
+    const subject = `Wedding inquiry from ${name || "a new client"}`;
+    const body = [
+      `Name: ${name}`,
+      `Wedding date: ${date || "Not decided"}`,
+      `Location: ${location || "Not decided"}`,
+      `Interested in: ${coverage || "Not specified"}`,
+      "",
+      "Details:",
+      details || "No additional details yet.",
+    ].join("\n");
+    setStatus("Your email app is opening with your details filled in.");
+    window.location.href = `mailto:${profile.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  };
+
+  return <form onSubmit={submitInquiry} className="grid gap-4 border border-white/10 bg-[#17110e] p-6 sm:grid-cols-2" aria-label="Wedding inquiry form">
+    <div className="sm:col-span-2"><p className="text-xs uppercase tracking-[.25em] text-[#e3a073]">Quick inquiry</p><p className="mt-2 text-sm leading-relaxed text-muted-foreground">Share the basics and your email app will open with a ready-to-send note.</p></div>
+    <label className="grid gap-2 text-sm text-[#eee4d8]">Your name<input required name="name" autoComplete="name" className="border border-white/15 bg-[#100c0a] px-3 py-3 text-[#eee4d8] outline-none transition focus:border-[#e3a073]" /></label>
+    <label className="grid gap-2 text-sm text-[#eee4d8]">Wedding date<input name="date" type="date" className="border border-white/15 bg-[#100c0a] px-3 py-3 text-[#eee4d8] outline-none transition focus:border-[#e3a073]" /></label>
+    <label className="grid gap-2 text-sm text-[#eee4d8]">Venue or town<input name="location" autoComplete="address-level2" className="border border-white/15 bg-[#100c0a] px-3 py-3 text-[#eee4d8] outline-none transition focus:border-[#e3a073]" /></label>
+    <label className="grid gap-2 text-sm text-[#eee4d8]">Looking for<select name="coverage" defaultValue="" className="border border-white/15 bg-[#100c0a] px-3 py-3 text-[#eee4d8] outline-none transition focus:border-[#e3a073]"><option value="" disabled>Select one</option><option>Photography</option><option>Videography</option><option>Photography and videography</option><option>Second-shooter support</option></select></label>
+    <label className="grid gap-2 text-sm text-[#eee4d8] sm:col-span-2">Anything else to know?<textarea name="details" rows={4} className="resize-y border border-white/15 bg-[#100c0a] px-3 py-3 text-[#eee4d8] outline-none transition focus:border-[#e3a073]" /></label>
+    <div className="sm:col-span-2"><button type="submit" className="border-b border-[#e3a073] pb-2 text-xs uppercase tracking-[.2em] text-primary transition hover:text-[#e3a073]">Create email inquiry</button>{status && <p className="mt-3 text-sm text-[#e3a073]" role="status">{status}</p>}</div>
+  </form>;
+}
+
 function ContactPageV2() {
   return <Layout page="contact">
     <section className="mx-auto max-w-7xl px-5 py-16 md:px-8 md:py-24">
-      <div className="grid gap-8 border-y border-white/10 py-12 md:grid-cols-[1fr_auto]">
+      <div className="grid gap-8 border-y border-white/10 py-12 lg:grid-cols-[.8fr_1.2fr]">
         <div><p className="text-xs uppercase tracking-[.28em] text-[#e3a073]">Get in touch</p><h1 className="mt-3 font-serif text-5xl text-primary">Tell me about your date.</h1><p className="mt-5 max-w-xl text-muted-foreground">Whether you are planning a wedding or staffing one, email or call with the date, location, and the kind of support you need.</p></div>
-        <div className="flex flex-col justify-center gap-4 text-sm"><a className="inline-flex items-center gap-3 hover:text-[#e3a073]" href={`mailto:${profile.email}`}><Mail className="size-5" />{profile.email}</a><a className="inline-flex items-center gap-3 hover:text-[#e3a073]" href={`tel:${profile.phone.replace(/\D/g, "")}`}><Phone className="size-5" />{profile.phone}</a><span className="inline-flex items-center gap-3 text-muted-foreground"><MapPin className="size-5" />{profile.location}</span></div>
+        <InquiryForm />
+        <div className="flex flex-col gap-4 text-sm lg:col-span-2 lg:flex-row lg:gap-8"><a className="inline-flex items-center gap-3 hover:text-[#e3a073]" href={`mailto:${profile.email}`}><Mail className="size-5" />{profile.email}</a><a className="inline-flex items-center gap-3 hover:text-[#e3a073]" href={`tel:${profile.phone.replace(/\D/g, "")}`}><Phone className="size-5" />{profile.phone}</a><span className="inline-flex items-center gap-3 text-muted-foreground"><MapPin className="size-5" />{profile.location}</span></div>
       </div>
     </section>
     <section className="border-t border-white/10 bg-[#211713]"><div className="mx-auto max-w-7xl px-5 py-16 md:px-8 md:py-24"><p className="text-xs uppercase tracking-[.28em] text-[#e3a073]">For studios and lead creatives</p><h2 className="mt-3 font-serif text-5xl text-primary">Building a thoughtful path into weddings.</h2><div className="mt-5 max-w-3xl space-y-4 leading-relaxed text-muted-foreground"><p>I am actively looking to grow within the wedding photography and videography industry by supporting established photographers, filmmakers, and production teams. I am available for entry-level and lower-rate second-shooter roles where an extra reliable set of hands would help your day run smoothly.</p><p>I also welcome mentorship or shadowing opportunities with experienced wedding professionals. My goal is to learn the pace, expectations, and standards of a well-run wedding day while contributing with a calm, prepared, and respectful approach to your existing workflow.</p></div></div></section>
@@ -334,6 +378,19 @@ function WeddingsPage() {
   </Layout>;
 }
 
-function App() { const page = currentPage(); if (page === "photography") return <PhotographyPage />; if (page === "cinematography") return <CinematographyPage />; if (page === "about") return <AboutPageV2 />; if (page === "contact") return <ContactPageV2 />; if (page === "weddings") return <WeddingsPage />; return <HomePage />; }
+function WeddingStoryPage() {
+  const images = ["himali-brian-01.jpg", "himali-brian-02-crop.jpg", "himali-brian-03-crop.jpg", "himali-brian-04.jpg", "himali-brian-05.jpg", "himali-brian-06.jpg"];
+  return <Layout page="story">
+    <section className="relative isolate overflow-hidden bg-[#100c0a]">
+      <img src={asset("portfolio/himali-brian-01.jpg")} alt="Himali and Brian on their courthouse wedding day in New Jersey" className="absolute inset-0 -z-20 h-full w-full object-cover object-[58%_center]" />
+      <div className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgba(13,9,8,.95)_0%,rgba(13,9,8,.72)_44%,rgba(13,9,8,.16)_100%),linear-gradient(0deg,rgba(13,9,8,.82)_0%,transparent_60%)]" />
+      <div className="mx-auto flex min-h-[72svh] max-w-7xl items-end px-5 py-14 md:items-center md:px-8 md:py-20"><div className="max-w-3xl"><p className="text-xs uppercase tracking-[.3em] text-[#e3a073]">New Jersey courthouse wedding</p><h1 className="mt-5 max-w-[12ch] font-serif text-6xl leading-[.86] text-primary sm:text-8xl">Himali & Brian.</h1><p className="mt-6 max-w-2xl leading-relaxed text-[#eee4d8]/84">A colorful, intimate celebration built around calm direction, portrait time, and the small moments that made the day feel entirely their own.</p></div></div>
+    </section>
+    <section className="border-y border-white/10 bg-[#17110e]"><div className="mx-auto grid max-w-7xl gap-8 px-5 py-16 md:grid-cols-3 md:px-8"><div><p className="text-xs uppercase tracking-[.24em] text-[#e3a073]">Approach</p><p className="mt-3 text-sm leading-relaxed text-muted-foreground">A relaxed mix of direction for portraits and room for unplanned moments to unfold.</p></div><div><p className="text-xs uppercase tracking-[.24em] text-[#e3a073]">Coverage</p><p className="mt-3 text-sm leading-relaxed text-muted-foreground">Couple portraits, individual details, family moments, and the atmosphere around the courthouse.</p></div><div><p className="text-xs uppercase tracking-[.24em] text-[#e3a073]">For couples</p><p className="mt-3 text-sm leading-relaxed text-muted-foreground">A thoughtful fit for courthouse weddings and smaller celebrations that still deserve careful coverage.</p></div></div></section>
+    <section className="mx-auto max-w-7xl px-5 py-16 md:px-8 md:py-24"><div className="columns-1 gap-5 sm:columns-2 lg:columns-3">{images.map((image, index) => <figure key={image} className="mb-5 break-inside-avoid overflow-hidden bg-[#251915] p-2"><img loading="lazy" decoding="async" className="h-auto w-full" src={asset(`portfolio/${image}`)} alt={`Himali and Brian courthouse wedding photograph ${index + 1}`} /></figure>)}</div><div className="mt-12 border-t border-white/10 pt-10"><p className="text-xs uppercase tracking-[.28em] text-[#e3a073]">Planning a smaller New Jersey wedding?</p><h2 className="mt-3 max-w-2xl font-serif text-5xl text-primary">Let’s make a plan that fits your day.</h2><a href={asset("contact/")} className="mt-7 inline-block border-b border-[#e3a073] pb-2 text-xs uppercase tracking-[.2em] text-primary transition hover:text-[#e3a073]">Check availability</a></div></section>
+  </Layout>;
+}
+
+function App() { const page = currentPage(); if (page === "photography") return <PhotographyPage />; if (page === "cinematography") return <CinematographyPage />; if (page === "about") return <AboutPageV2 />; if (page === "contact") return <ContactPageV2 />; if (page === "weddings") return <WeddingsPage />; if (page === "story") return <WeddingStoryPage />; return <HomePage />; }
 
 createRoot(document.getElementById("root")!).render(<StrictMode><App /></StrictMode>);

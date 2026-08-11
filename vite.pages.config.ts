@@ -15,6 +15,7 @@ export default defineConfig({
         about: "about/index.html",
         contact: "contact/index.html",
         weddings: "nj-wedding-photography-video/index.html",
+        himaliBrianStory: "himali-brian-courthouse-wedding/index.html",
       },
     },
   },
