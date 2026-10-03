@@ -26,11 +26,13 @@ const photoCollections = [
   },
   {
     name: "Family Portraits",
+    displayGrade: "saturate(0.92) contrast(0.96) brightness(0.99)",
     kind: "Natural-light family session",
     images: ["family-01-natural.jpg", "family-02-natural.jpg", "family-03-natural.jpg", "family-04-natural.jpg"],
   },
   {
     name: "Sam & Ruby",
+    displayGrade: "saturate(0.90) contrast(0.92) brightness(0.98)",
     kind: "Natural-light lifestyle portrait session",
     images: ["sam-ruby-01.jpg", "sam-ruby-02.jpg", "sam-ruby-03.jpg", "sam-ruby-04.jpg"],
   },
@@ -189,7 +191,7 @@ function PhotographyPage() {
     {photoCollections.map((collection) => <section key={collection.name} className="border-t border-white/10">
       <div className="mx-auto max-w-7xl px-5 py-16 md:px-8 md:py-24">
         <div className="mb-10 flex flex-col gap-2 md:flex-row md:items-end md:justify-between"><div><p className="text-xs uppercase tracking-[0.28em] text-[#e3a073]">Selected work</p><h2 className="mt-3 font-serif text-5xl text-primary">{collection.name}</h2></div><p className="text-sm text-muted-foreground">{collection.kind}</p></div>
-        <div className="columns-1 gap-5 sm:columns-2 lg:columns-3">{collection.images.map((image, index) => <figure key={image} className="mb-5 break-inside-avoid overflow-hidden bg-[#251915] p-2"><img loading="lazy" decoding="async" className="h-auto w-full" src={asset(`portfolio/${image}`)} alt={`${collection.name} photograph ${index + 1}`} /></figure>)}</div>
+        <div className="columns-1 gap-5 sm:columns-2 lg:columns-3">{collection.images.map((image, index) => <figure key={image} className="mb-5 break-inside-avoid overflow-hidden bg-[#251915] p-2"><img loading="lazy" decoding="async" className="h-auto w-full" style={{ filter: collection.displayGrade }} src={asset(`portfolio/${image}`)} alt={`${collection.name} photograph ${index + 1}`} /></figure>)}</div>
       </div>
     </section>)}
     <section className="mx-auto max-w-7xl px-5 py-16 md:px-8 md:py-24"><SectionHeading eyebrow="Equipment" title="What I bring." /><div className="mt-10"><GearList /></div></section>
